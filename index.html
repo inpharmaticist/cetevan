@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Cetevan Consulting | Bitcoin Self-Custody Guidance</title>
+   <meta name="description" content="Guided implementation of open-source Bitcoin self-custody solutions. Save weeks of research and avoid costly mistakes.">
+   <style>
+       :root {
+           --text-primary: #1a1a1a;
+           --text-secondary: #4a4a4a;
+           --bg-primary: #ffffff;
+           --bg-secondary: #f5f5f5;
+           --accent: #2c5aa0;
+           --accent-hover: #1e3d6f;
+           --border: #e0e0e0;
+           --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+           --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+       }
+
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+       }
+
+       body {
+           font-family: var(--font-main);
+           line-height: 1.6;
+           color: var(--text-primary);
+           background-color: var(--bg-primary);
+           font-size: 18px;
+           -webkit-font-smoothing: antialiased;
+       }
+
+       .container {
+           max-width: 800px;
+           margin: 0 auto;
+           padding: 0 1.5rem;
+       }
+
+       /* Typography */
+       h1, h2, h3 {
+           line-height: 1.2;
+           margin-bottom: 1rem;
+           font-weight: 600;
+       }
+
+       h1 { font-size: 2.5rem; }
+       h2 { font-size: 2rem; margin-top: 3rem; }
+       h3 { font-size: 1.5rem; }
+
+       p {
+           margin-bottom: 1.5rem;
+           color: var(--text-secondary);
+       }
+
+       /* Header/Hero */
+       header {
+           padding: 4rem 0 2rem;
+           border-bottom: 1px solid var(--border);
+           margin-bottom: 2rem;
+       }
+
+       .tagline {
+           font-size: 1.25rem;
+           color: var(--text-secondary);
+           margin-bottom: 2rem;
+           line-height: 1.4;
+       }
+
+       .cta-group {
+           display: flex;
+           gap: 1rem;
+           flex-wrap: wrap;
+           margin-top: 2rem;
+       }
+
+       /* Buttons */
+       .btn {
+           display: inline-block;
+           padding: 1rem 2rem;
+           background-color: var(--accent);
+           color: white;
+           text-decoration: none;
+           border-radius: 4px;
+           font-weight: 500;
+           transition: background-color 0.2s;
+           border: none;
+           cursor: pointer;
+           font-size: 1.1rem;
+           text-align: center;
+       }
+
+       .btn:hover {
+           background-color: var(--accent-hover);
+       }
+
+       .btn-secondary {
+           background-color: transparent;
+           color: var(--accent);
+           border: 2px solid var(--accent);
+       }
+
+       .btn-secondary:hover {
+           background-color: var(--accent);
+           color: white;
+       }
+
+       /* Sections */
+       section {
+           margin-bottom: 4rem;
+       }
+
+       /* Audit Section */
+       .audit-box {
+           background-color: var(--bg-secondary);
+           padding: 2rem;
+           border-radius: 8px;
+           margin: 2rem 0;
+           border: 1px solid var(--border);
+       }
+
+       .audit-list {
+           list-style: none;
+           margin: 1.5rem 0;
+       }
+
+       .audit-list li {
+           margin-bottom: 1rem;
+           padding-left: 2rem;
+           position: relative;
+           font-size: 1.1rem;
+       }
+
+       .audit-list li::before {
+           content: "☐";
+           position: absolute;
+           left: 0;
+           font-size: 1.2rem;
+           color: var(--accent);
+       }
+
+       .audit-warning {
+           font-weight: 600;
+           color: var(--text-primary);
+           margin: 1.5rem 0;
+           padding: 1rem;
+           background-color: #fff3cd;
+           border-left: 4px solid #ffc107;
+           border-radius: 4px;
+       }
+
+       /* Process Steps */
+       .steps {
+           display: grid;
+           gap: 2rem;
+           margin-top: 2rem;
+       }
+
+       .step {
+           padding: 1.5rem;
+           border-left: 4px solid var(--accent);
+           background-color: var(--bg-secondary);
+       }
+
+       .step-number {
+           font-weight: 700;
+           color: var(--accent);
+           font-size: 1.2rem;
+           margin-bottom: 0.5rem;
+       }
+
+       /* Lists */
+       ul {
+           margin-left: 1.5rem;
+           margin-bottom: 1.5rem;
+       }
+
+       li {
+           margin-bottom: 0.75rem;
+           color: var(--text-secondary);
+       }
+
+       /* Pricing */
+       .price {
+           font-size: 2rem;
+           font-weight: 700;
+           color: var(--text-primary);
+           margin: 1rem 0;
+       }
+
+       .price-note {
+           font-size: 1rem;
+           color: var(--text-secondary);
+           font-weight: 400;
+       }
+
+       /* Contact Form */
+       .form-group {
+           margin-bottom: 1.5rem;
+       }
+
+       label {
+           display: block;
+           margin-bottom: 0.5rem;
+           font-weight: 500;
+           color: var(--text-primary);
+       }
+
+       input, select, textarea {
+           width: 100%;
+           padding: 0.75rem;
+           font-size: 1rem;
+           border: 1px solid var(--border);
+           border-radius: 4px;
+           font-family: var(--font-main);
+       }
+
+       input:focus, select:focus, textarea:focus {
+           outline: none;
+           border-color: var(--accent);
+       }
+
+       /* Footer */
+       footer {
+           border-top: 1px solid var(--border);
+           padding: 2rem 0;
+           margin-top: 4rem;
+           font-size: 0.9rem;
+           color: var(--text-secondary);
+           text-align: center;
+       }
+
+       footer p {
+           margin-bottom: 0.5rem;
+       }
+
+       /* Responsive */
+       @media (max-width: 600px) {
+           body {
+               font-size: 16px;
+           }
+
+           h1 { font-size: 2rem; }
+           h2 { font-size: 1.75rem; }
+
+           .cta-group {
+               flex-direction: column;
+           }
+
+           .btn {
+               width: 100%;
+           }
+       }
+
+       /* Print styles for the audit card */
+       @media print {
+           header, footer, .cta-group, #contact {
+               display: none;
+           }
+
+           .audit-box {
+               border: 2px solid #000;
+               break-inside: avoid;
+           }
+       }
+
+       /* Utility */
+       .text-center {
+           text-align: center;
+       }
+
+       .mt-2 {
+           margin-top: 2rem;
+       }
+   </style>
+</head>
+<body>
+
+   <header>
+       <div class="container">
+           <h1>Save Weeks of Research—Get Your Bitcoin Security Right the First Time</h1>
+           <p class="tagline">
+               Whether you're a command-line expert or prefer simple interfaces, I bridge the gap 
+               between where you are and a robust self-custody setup. All recommendations use 
+               open-source tools and public best practices—I'll get you there faster than going it alone.
+           </p>
+           <div class="cta-group">
+               <a href="#audit" class="btn">Take the 5-Minute Security Audit</a>
+               <a href="#contact" class="btn btn-secondary">Schedule Free Consultation</a>
+           </div>
+       </div>
+   </header>
+
+   <main class="container">
+
+       <section id="problem">
+           <h2>The Digital Mattress Problem</h2>
+           <p>
+               You moved your wealth out of the banking system for a reason. But if your Bitcoin is sitting 
+               on an exchange, or stored on a single hardware wallet in your desk drawer, you haven't eliminated 
+               risk—you've just changed its shape.
+           </p>
+           <p>
+               For those of us who remember safety deposit boxes and bond certificates, Bitcoin can feel like 
+               stuffing cash in a digital mattress. You know it's valuable. You know it needs protection. 
+               But the tools feel foreign, and the stakes are high.
+           </p>
+           <p>
+               That's where Cetevan comes in.
+           </p>
+       </section>
+
+       <section id="audit">
+           <div class="audit-box">
+               <h2>The 5-Minute Security Audit</h2>
+               <p>Check your current setup:</p>
+               
+               <ul class="audit-list">
+                   <li>If your house/devices were destroyed, could you recover your bitcoin?</li>
+                   <li>Could your loved one(s) access the funds without help after you're gone?</li>
+                   <li>Do you have backups in multiple locations?</li>
+                   <li>Is your recovery phrase removed from computers/phone/cloud?</li>
+                   <li>Have you done a recovery test this year?</li>
+               </ul>
+
+               <div class="audit-warning">
+                   A "NO" means you're at risk of losing your bitcoin.
+               </div>
+
+               <div class="text-center mt-2">
+                   <a href="#contact" class="btn">Fix These Gaps—Book Free Consultation</a>
+               </div>
+
+               <!-- QR Code placeholder - generate at qrserver.com or similar -->
+               <!-- <div class="text-center mt-2">
+                   <img src="qr-code.png" alt="Scan to book" style="max-width: 150px;">
+                   <p style="font-size: 0.9rem; margin-top: 0.5rem;">Scan to book</p>
+               </div> -->
+           </div>
+       </section>
+
+       <section id="how-it-works">
+           <h2>How It Works</h2>
+           <p>
+               All my recommendations are readily available in public documentation—but I'll get you from 
+               where you are to where you want to be faster, with fewer missteps.
+           </p>
+
+           <div class="steps">
+               <div class="step">
+                   <div class="step-number">Step 1: The Free Audit (30 Minutes)</div>
+                   <p>
+                       We review your current setup (or lack thereof). I explain the gaps in plain English. 
+                       You get a prioritized roadmap. No obligation.
+                   </p>
+               </div>
+
+               <div class="step">
+                   <div class="step-number">Step 2: Guided Implementation</div>
+                   <p>
+                       We work together in real-time—me guiding, you operating. You maintain control of your keys 
+                       at all times. I never touch your devices or see your seed phrases.
+                   </p>
+                   <p>
+                       <strong>\$200/hour (Bitcoin/Lightning)</strong><br>
+                       <strong>\$220/hour (Fiat)</strong>
+                   </p>
+               </div>
+
+               <div class="step">
+                   <div class="step-number">Step 3: The Legacy Plan (Optional)</div>
+                   <p>
+                       For those with significant holdings: Multi-signature architecture, heir education sessions, 
+                       and written recovery protocols that your family can actually use.
+                   </p>
+               </div>
+           </div>
+
+           <p style="margin-top: 1.5rem; font-size: 0.95rem;">
+               <em>All work is governed by a Master Service Agreement that explicitly prohibits me from ever 
+               accessing your funds or keys.</em>
+           </p>
+       </section>
+
+       <section id="who-for">
+           <h2>Who This Is For</h2>
+           <p>
+               You either want to start with Bitcoin or already have some and aren't sure about the next steps. 
+               Specifically:
+           </p>
+           <ul>
+               <li>You want your spouse or heirs to inherit without calling a "Bitcoin help desk" (which doesn't exist)</li>
+               <li>You value privacy and want to minimize data trails while maximizing security</li>
+               <li>You're willing to learn, but want an expert watching your first setup to avoid costly mistakes</li>
+               <li>You already have a setup and want a second opinion on your security architecture</li>
+           </ul>
+           <p>
+               <strong>Not sure if you're technical enough?</strong> If you can use online banking, you can do this—with guidance.
+           </p>
+       </section>
+
+       <section id="pricing">
+           <h2>Pricing</h2>
+           
+           <div class="price">
+               \$200/hour <span class="price-note">(Bitcoin/Lightning)</span><br>
+               \$220/hour <span class="price-note">(Fiat)</span>
+           </div>
+
+           <h3>What's Included:</h3>
+           <ul>
+               <li>Pre-session threat modeling</li>
+               <li>Real-time guidance (in-person throughout Southern California, or remote if preferred)</li>
+               <li>Post-session documentation</li>
+               <li>Ongoing Signal support for clarifications</li>
+           </ul>
+
+           <p><strong>First consultation is always free.</strong></p>
+           
+           <p style="font-size: 0.95rem; color: var(--text-secondary);">
+               Payment via BTCPay Server (self-hosted, no third-party custody).
+           </p>
+       </section>
+
+       <section id="about">
+           <h2>About Cetevan</h2>
+           <p>
+               Corey Edwards has been organizing the San Diego Bitcoiners community for five years. 
+               Cetevan Consulting is the formalization of that work—helping individuals and families 
+               implement bank-grade security without bank-grade complexity.
+           </p>
+           <p>
+               All recommendations use open-source software (Sparrow, Specter, Bitcoin Core) and follow 
+               established best practices from the Bitcoin Core developer community. No proprietary tools. 
+               No hidden fees.
+           </p>
+           <p>
+               Based in San Diego, CA. Available for in-person setup throughout Southern California 
+               or remote sessions nationwide.
+           </p>
+       </section>
+
+       <section id="contact">
+           <h2>Ready to Close the Gaps?</h2>
+           
+           <!-- Replace this form action with your form handler (Formspree, Netlify Forms, etc.) -->
+           <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+               <div class="form-group">
+                   <label for="name">Name</label>
+                   <input type="text" id="name" name="name" required>
+               </div>
+
+               <div class="form-group">
+                   <label for="email">Email</label>
+                   <input type="email" id="email" name="email" required>
+               </div>
+
+               <div class="form-group">
+                   <label for="location">Location (State)</label>
+                   <input type="text" id="location" name="location" placeholder="e.g., California" required>
+               </div>
+
+               <div class="form-group">
+                   <label for="setup">Current Setup</label>
+                   <select id="setup" name="setup" required>
+                       <option value="">Select...</option>
+                       <option value="exchange">Exchange only</option>
+                       <option value="hardware">Hardware wallet</option>
+                       <option value="other">Other</option>
+                       <option value="none">None yet</option>
+                   </select>
+               </div>
+
+               <div class="form-group">
+                   <label for="time">Best Time to Contact</label>
+                   <input type="text" id="time" name="best_time" placeholder="e.g., Weekday evenings, Saturday mornings">
+               </div>
+
+               <button type="submit" class="btn">Request Free Consultation</button>
+           </form>
+
+           <p style="margin-top: 2rem; text-align: center;">
+               Or find me at <strong>San Diego Bitcoiners</strong> events.
+           </p>
+       </section>
+
+   </main>
+
+   <footer>
+       <div class="container">
+           <p><strong>Cetevan Consulting, LLC</strong> | San Diego, CA</p>
+           <p style="font-size: 0.85rem; max-width: 600px; margin: 1rem auto;">
+               Disclaimer: Services are educational and technical only. Cetevan does not hold custody of 
+               client funds, provide investment advice, or guarantee specific security outcomes. 
+               Client maintains sole control and responsibility for all private keys.
+           </p>
+           <p style="font-size: 0.85rem; margin-top: 1rem;">© 2025 Cetevan Consulting, LLC</p>
+       </div>
+   </footer>
+
+</body>
+</html>

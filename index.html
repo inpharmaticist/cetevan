@@ -1,933 +1,1061 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="sdbitcoiners.svg">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetevan | Bitcoin Self-Custody Guidance</title>
-    <meta name="description" content="Guided implementation of open-source Bitcoin self-custody solutions. Save weeks of research and avoid costly mistakes.">
-    <style>
-        :root {
-            --text-primary: #272761;
-            --text-secondary: #4a4a6a;
-            --bg-primary: #ffffff;
-            --bg-secondary: #fef6ed;
-            --bg-tertiary: #fdecd8;
-            --accent: #E88A3C;
-            --accent-hover: #d67a2e;
-            --border: #f5d0b0;
-            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
+   <meta charset="UTF-8">
+   <link rel="icon" type="image/svg+xml" href="sdbitcoiners.svg">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Cetevan | Bitcoin Self-Custody Guidance</title>
+   <meta name="description" content="Guided implementation of open-source Bitcoin self-custody solutions. Save weeks of research and avoid costly mistakes.">
+   <style>
+       :root {
+           --text-primary: #272761;
+           --text-secondary: #4a4a6a;
+           --bg-primary: #ffffff;
+           --bg-secondary: #fef6ed;
+           --bg-tertiary: #fdecd8;
+           --accent: #E88A3C;
+           --accent-hover: #d67a2e;
+           --border: #f5d0b0;
+           --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+       }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+       }
 
-        html {
-            scroll-behavior: smooth;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-        }
+       html {
+           scroll-behavior: smooth;
+           overflow-y: scroll;
+           /* scroll-snap-type removed */
+       }
 
-        body {
-            font-family: var(--font-main);
-            line-height: 1.7;
-            color: var(--text-primary);
-            background-color: var(--bg-primary);
-            font-size: 20px;
-            -webkit-font-smoothing: antialiased;
-        }
+       body {
+           font-family: var(--font-main);
+           line-height: 1.7;
+           color: var(--text-primary);
+           background-color: var(--bg-primary);
+           font-size: 20px;
+           -webkit-font-smoothing: antialiased;
+       }
 
-        section {
-            height: 100vh;
-            width: 100%;
-            scroll-snap-align: start;
-            scroll-snap-stop: always;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 2rem 0;
-            position: relative;
-            overflow-y: auto;
-        }
+       /* Sticky Navigation */
+       .sticky-nav {
+           position: sticky;
+           top: 0;
+           z-index: 1000;
+           background-color: rgba(255, 255, 255, 0.95);
+           backdrop-filter: blur(10px);
+           border-bottom: 1px solid var(--border);
+           padding: 0.75rem 0;
+       }
 
-        #contact {
-            justify-content: flex-start;
-            padding-top: 2rem;
-        }
+       .nav-container {
+           max-width: 1200px;
+           margin: 0 auto;
+           padding: 0 1.5rem;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+       }
 
-        #contact .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+       .nav-logo {
+           font-weight: 700;
+           font-size: 1.5rem;
+           color: var(--text-primary);
+           text-decoration: none;
+       }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-            width: 100%;
-        }
+       .nav-logo:hover {
+           color: var(--accent);
+           text-decoration: none;
+       }
 
-        h1, h2, h3 {
-            line-height: 1.2;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
+       .nav-links {
+           display: flex;
+           gap: 2rem;
+           align-items: center;
+           flex-wrap: wrap;
+           justify-content: flex-end;
+       }
 
-        h1 {
-            font-size: 2.5rem;
-            letter-spacing: -0.5px;
-        }
+       .nav-links a {
+           color: var(--text-secondary);
+           text-decoration: none;
+           font-size: 0.95rem;
+           font-weight: 500;
+           transition: color 0.2s;
+       }
 
-        h2 {
-            font-size: 2rem;
-        }
+       .nav-links a:hover {
+           color: var(--accent);
+           text-decoration: none;
+       }
 
-        h3 {
-            font-size: 1.25rem;
-        }
+       .nav-cta {
+           background-color: var(--accent);
+           color: white !important;
+           padding: 0.5rem 1.25rem;
+           border-radius: 6px;
+           font-weight: 600;
+       }
 
-        p {
-            margin-bottom: 1.5rem;
-            color: var(--text-secondary);
-        }
+       .nav-cta:hover {
+           background-color: var(--accent-hover);
+           color: white !important;
+       }
 
-        .tagline {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-            line-height: 1.4;
-        }
+       section {
+           min-height: 80vh;
+           padding: 4rem 0; /* Increased padding for better spacing without snap */
+           position: relative;
+           overflow-y: auto;
+       }
 
-        .cta-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-top: 2rem;
-        }
+       #contact {
+           justify-content: flex-start;
+           padding-top: 2rem;
+       }
 
-        .btn {
-            display: inline-block;
-            padding: 1rem 2rem;
-            background-color: var(--accent);
-            color: white;
-            text-decoration: none;
+       #contact .container {
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+       }
+
+       .container {
+           max-width: 800px;
+           margin: 0 auto;
+           padding: 0 1.5rem;
+           width: 100%;
+       }
+
+       h1, h2, h3 {
+           line-height: 1.2;
+           margin-bottom: 1rem;
+           font-weight: 600;
+           color: var(--text-primary);
+       }
+
+       h1 {
+           font-size: 2.5rem;
+           letter-spacing: -0.5px;
+       }
+
+       h2 {
+           font-size: 2rem;
+       }
+
+       h3 {
+           font-size: 1.25rem;
+       }
+
+       p {
+           margin-bottom: 1.5rem;
+           color: var(--text-secondary);
+       }
+
+       .tagline {
+           font-size: 1.25rem;
+           color: var(--text-secondary);
+           margin-bottom: 2rem;
+           line-height: 1.4;
+       }
+
+       .cta-group {
+           display: flex;
+           gap: 1rem;
+           flex-wrap: wrap;
+           margin-top: 2rem;
+       }
+
+       .btn {
+           display: inline-block;
+           padding: 1rem 2rem;
+           background-color: var(--accent);
+           color: white;
+           text-decoration: none;
+           border-radius: 8px;
+           font-weight: 600;
+           transition: all 0.2s;
+           border: none;
+           cursor: pointer;
+           font-size: 1.1rem;
+           text-align: center;
+           box-shadow: 0 2px 4px rgba(232, 138, 60, 0.3);
+       }
+
+       .btn:hover {
+           background-color: var(--accent-hover);
+           color: white;
+           transform: translateY(-1px);
+           box-shadow: 0 4px 8px rgba(232, 138, 60, 0.4);
+       }
+
+       .btn-secondary {
+           background-color: transparent;
+           color: var(--accent);
+           border: 2px solid var(--accent);
+           box-shadow: none;
+       }
+
+       .btn-secondary:hover {
+           background-color: var(--accent);
+           color: white;
+       }
+
+       /* Three box style for How It Works */
+       .steps-grid {
+           display: grid;
+           grid-template-columns: repeat(3, 1fr);
+           gap: 1.5rem;
+           margin-top: 2rem;
+       }
+
+       .step-box {
+           background-color: var(--bg-secondary);
+           padding: 2rem;
+           border-radius: 12px;
+           border: 2px solid var(--border);
+       }
+
+       .step-box h3 {
+           color: var(--accent);
+           margin-bottom: 0.75rem;
+           font-size: 1.1rem;
+       }
+
+       .step-box p {
+           margin-bottom: 0;
+           font-size: 0.95rem;
+       }
+
+       /* Illustration Placeholders */
+       .illustration-placeholder {
+           width: 100%;
+           height: 200px;
+           background-color: var(--bg-secondary);
+           border: 2px dashed var(--border);
+           border-radius: 12px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           color: var(--text-secondary);
+           font-style: italic;
+           margin: 2rem 0;
+       }
+
+       /* Service bullets integrated into Problem section */
+       .service-bullets {
+           margin-top: 1.5rem;
+           margin-left: 1.5rem;
+       }
+
+       .service-bullets li {
+           margin-bottom: 0.75rem;
+           color: var(--text-secondary);
+       }
+
+       .audit-box {
+           background-color: var(--bg-secondary);
+           padding: 2rem;
+           border-radius: 12px;
+           margin: 2rem 0;
+           border: 2px solid var(--border);
+           box-shadow: 0 4px 6px -1px rgba(232, 138, 60, 0.1);
+       }
+
+       .audit-intro {
+           font-weight: 600;
+           margin-bottom: 1rem;
+           color: var(--text-primary);
+       }
+
+       .audit-list {
+           list-style-type: disc;
+           margin-left: 1.5rem;
+           margin-bottom: 1.5rem;
+       }
+
+       .audit-list li {
+           margin-bottom: 0.75rem;
+           color: var(--text-secondary);
+           padding-left: 0;
+       }
+
+       .audit-list li::before {
+           display: none;
+       }
+
+       .audit-warning {
+           font-weight: 600;
+           color: var(--text-primary);
+           margin: 1.5rem 0;
+           padding: 1rem;
+           background-color: #fff3cd;
+           border-left: 4px solid var(--accent);
+           border-radius: 4px;
+       }
+
+       ul {
+           margin-left: 1.5rem;
+           margin-bottom: 1.5rem;
+       }
+
+       li {
+           margin-bottom: 0.75rem;
+           color: var(--text-secondary);
+       }
+
+       a {
+           color: var(--accent);
+           text-decoration: none;
+       }
+
+       a:hover {
+           text-decoration: underline;
+           color: var(--accent-hover);
+       }
+
+       .nav-dots {
+           position: fixed;
+           right: 2rem;
+           top: 50%;
+           transform: translateY(-50%);
+           z-index: 100;
+           display: none;
+           flex-direction: column;
+           gap: 1rem;
+       }
+
+       .nav-dot {
+           width: 12px;
+           height: 12px;
+           border-radius: 50%;
+           background-color: var(--border);
+           cursor: pointer;
+           transition: background-color 0.3s;
+           border: 2px solid var(--accent);
+           display: block;
+       }
+
+       .nav-dot:hover,
+       .nav-dot.active {
+           background-color: var(--accent);
+       }
+
+       footer {
+           border-top: 1px solid var(--border);
+           padding: 2rem 0;
+           font-size: 0.9rem;
+           color: var(--text-secondary);
+           text-align: center;
+           background-color: var(--bg-secondary);
+       }
+
+       footer p {
+           margin-bottom: 0.5rem;
+       }
+
+       .text-center {
+           text-align: center;
+       }
+
+       .mt-2 {
+           margin-top: 2rem;
+       }
+
+       .form-group {
+           margin-bottom: 1rem;
+       }
+
+       .form-group label {
+           display: block;
+           margin-bottom: 0.5rem;
+           font-weight: 500;
+       }
+
+       .form-group small {
+           display: block;
+           margin-top: 0.25rem;
+       }
+
+       /* Logo styles */
+       .logo-container {
+           text-align: center;
+           margin-bottom: 2rem;
+       }
+       
+       .logo {
+           width: 280px;
+           height: auto;
+       }
+
+       /* Scroll indicator */
+       .scroll-indicator {
+           position: absolute;
+           bottom: 2rem;
+           left: 50%;
+           transform: translateX(-50%);
+           color: var(--accent);
+           font-size: 2rem;
+           animation: bounce 2s infinite;
+           text-decoration: none;
+           opacity: 0.8;
+           transition: opacity 0.3s;
+       }
+
+       .scroll-indicator:hover {
+           opacity: 1;
+       }
+
+       @keyframes bounce {
+           0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+           40% { transform: translateX(-50%) translateY(-10px); }
+           60% { transform: translateX(-50%) translateY(-5px); }
+       }
+
+       /* Testimonials */
+       #testimonials {
+           justify-content: center;
+       }
+
+       .testimonials-wrapper {
+           position: relative;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           gap: 1rem;
+           margin-top: 2rem;
+       }
+
+       .testimonials-scroll {
+           display: flex;
+           gap: 2rem;
+           overflow-x: auto;
+           scroll-snap-type: x mandatory;
+           scroll-behavior: smooth;
+           padding: 1rem 0;
+           width: 100%;
+           max-width: 700px;
+           scrollbar-width: none;
+           -ms-overflow-style: none;
+       }
+
+       .testimonials-scroll::-webkit-scrollbar {
+           display: none;
+       }
+
+       .testimonial-card {
+           flex: 0 0 100%;
+           max-width: 700px;
+           background-color: var(--bg-secondary);
+           border-left: 4px solid var(--accent);
+           border-radius: 8px;
+           padding: 3rem;
+           scroll-snap-align: center;
+           box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+       }
+
+       .testimonial-text {
+           font-style: italic;
+           color: var(--text-primary);
+           margin-bottom: 1rem;
+           line-height: 1.6;
+           font-size: 1.1rem;
+       }
+
+       .testimonial-author {
+           font-weight: 600;
+           color: var(--accent);
+           margin-bottom: 0;
+           text-align: left;
+       }
+
+       .scroll-arrow {
+           background-color: var(--accent);
+           color: white;
+           border: none;
+           width: 50px;
+           height: 50px;
+           border-radius: 50%;
+           font-size: 1.25rem;
+           cursor: pointer;
+           transition: all 0.2s;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           flex-shrink: 0;
+           box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+           line-height: 1;
+           padding-bottom: 2px;
+       }
+
+       .scroll-arrow:hover {
+           background-color: var(--accent-hover);
+           transform: scale(1.05);
+       }
+
+       .scroll-arrow:active {
+           transform: scale(0.95);
+       }
+
+       /* About section portrait */
+       .about-content {
+           display: flex;
+           gap: 2rem;
+           align-items: flex-start;
+           flex-wrap: wrap;
+       }
+
+       .about-text {
+           flex: 1;
+           min-width: 300px;
+       }
+
+       .about-portrait {
+           flex: 0 0 200px;
+           text-align: center;
+       }
+
+       .portrait-placeholder {
+           width: 200px;
+           height: 200px;
+           background-color: var(--bg-secondary);
+           border: 2px dashed var(--border);
+           border-radius: 50%;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           color: var(--text-secondary);
+           font-size: 0.9rem;
+           text-align: center;
+           padding: 1rem;
+           margin: 0 auto 1rem;
+       }
+
+       /* Mobile */
+       @media (max-width: 768px) {
+           .nav-links {
+               gap: 1rem;
+               font-size: 0.85rem;
+           }
+           
+           .nav-links a:not(.nav-cta) {
+               display: none;
+           }
+           
+           section {
+               min-height: auto;
+               padding: 3rem 0;
+           }
+           
+           .nav-dots {
+               display: flex;
+           }
+           
+           .scroll-indicator {
+               display: none;
+           }
+           
+           .scroll-arrow {
+               display: none;
+           }
+           
+           body {
+               font-size: 18px;
+           }
+
+           h1 {
+               font-size: 1.75rem;
+           }
+
+           h2 {
+               font-size: 1.5rem;
+           }
+
+           .steps-grid {
+               grid-template-columns: 1fr;
+           }
+
+           .testimonial-card {
+               flex: 0 0 85%;
+               padding: 2rem;
+               font-size: 1rem;
+           }
+           
+           .testimonials-scroll {
+               max-width: none;
+               gap: 1rem;
+           }
+           
+           .testimonials-wrapper {
+               margin: 0 -1.5rem;
+               padding: 0 1.5rem;
+           }
+
+           .cta-group {
+               flex-direction: column;
+           }
+
+           .btn {
+               width: 100%;
+           }
+
+           .audit-box {
+               padding: 1.5rem;
+           }
+
+           .about-portrait {
+               flex: 0 0 100%;
+               margin-bottom: 1rem;
+           }
+       }
+
+       @media print {
+           section {
+               height: auto;
+               min-height: auto;
+           }
+           
+           body {
+               font-size: 12pt;
+               color: #272761;
+           }
+
+           .audit-box {
+               background-color: #fef6ed !important;
+               border: 2px solid #E88A3C;
+               box-shadow: none;
+               page-break-inside: avoid;
+               -webkit-print-color-adjust: exact;
+               print-color-adjust: exact;
+           }
+
+           .btn,
+           .nav-dots,
+           .scroll-indicator,
+           .scroll-arrow,
+           .sticky-nav {
+               display: none;
+           }
+       }
+
+       .float-image {
+            float: left;
+            max-width: 280px;
+            width: 40%;
+            height: auto;
+            margin: 0.5rem 1.5rem 1rem 0;
             border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(232, 138, 60, 0.3);
         }
 
-        .btn:hover {
-            background-color: var(--accent-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(232, 138, 60, 0.4);
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--accent);
-            border: 2px solid var(--accent);
-            box-shadow: none;
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        /* Single box style for How It Works */
-        .single-box {
-            background-color: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 2px solid var(--border);
-            margin-top: 1rem;
-        }
-
-        .single-box p {
-            margin-bottom: 1rem;
-        }
-
-        .single-box p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Service grid - 3 columns */
-        .service-grid {
+        .service-bullets {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-top: 2rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem 2rem;
+            list-style: none; /* Remove default bullets */
+            margin-left: 0;
+            padding-left: 0;
+            clear: both;
         }
 
-        .service-item {
-            background-color: var(--bg-secondary);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid var(--accent);
-        }
-
-        .service-item h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .service-item p {
-            margin-bottom: 0;
-            font-size: 0.95rem;
-        }
-
-        .audit-box {
-            background-color: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 12px;
-            margin: 2rem 0;
-            border: 2px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(232, 138, 60, 0.1);
-        }
-
-        .audit-list {
-            list-style: none;
-            margin: 1.5rem 0;
-        }
-
-        .audit-list li {
-            margin-bottom: 1rem;
-            padding-left: 2rem;
+        .service-bullets li {
             position: relative;
-            font-size: 1.1rem;
-            color: var(--text-primary);
+            padding-left: 1.5rem;
+            margin-bottom: 0;
         }
 
-        .audit-list li::before {
-            content: "☐";
+        .service-bullets li::before {
+            content: "✓";
+            color: var(--accent);
             position: absolute;
             left: 0;
-            font-size: 1.2rem;
-            color: var(--accent);
             font-weight: bold;
         }
 
-        .audit-warning {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background-color: #fff3cd;
-            border-left: 4px solid var(--accent);
-            border-radius: 4px;
-        }
-
-        ul {
-            margin-left: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        li {
-            margin-bottom: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-            color: var(--accent-hover);
-        }
-
-        .nav-dots {
-            position: fixed;
-            right: 2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .nav-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: var(--border);
-            cursor: pointer;
-            transition: background-color 0.3s;
-            border: 2px solid var(--accent);
-            display: block;
-        }
-
-        .nav-dot:hover,
-        .nav-dot.active {
-            background-color: var(--accent);
-        }
-
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 2rem 0;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            text-align: center;
-            background-color: var(--bg-secondary);
-        }
-
-        footer p {
-            margin-bottom: 0.5rem;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .mt-2 {
-            margin-top: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .form-group small {
-            display: block;
-            margin-top: 0.25rem;
-        }
-
-        /* Logo styles */
-        .logo-container {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .logo {
-            width: 200px;
-            height: auto;
-        }
-
-        /* Scroll indicator */
-        .scroll-indicator {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--accent);
-            font-size: 2rem;
-            animation: bounce 2s infinite;
-            text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.3s;
-        }
-
-        .scroll-indicator:hover {
-            opacity: 1;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-            40% { transform: translateX(-50%) translateY(-10px); }
-            60% { transform: translateX(-50%) translateY(-5px); }
-        }
-
-        /* Testimonials */
-        #testimonials {
-            justify-content: center;
-        }
-
-        .testimonials-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .testimonials-scroll {
-            display: flex;
-            gap: 2rem;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            padding: 1rem 0;
-            width: 100%;
-            max-width: 700px;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        .testimonials-scroll::-webkit-scrollbar {
-            display: none;
-        }
-
-        .testimonial-card {
-            flex: 0 0 100%;
-            max-width: 700px;
-            background-color: var(--bg-secondary);
-            border-left: 4px solid var(--accent);
-            border-radius: 8px;
-            padding: 2rem;
-            scroll-snap-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .testimonial-text {
-            font-style: italic;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            line-height: 1.6;
-            font-size: 1.1rem;
-        }
-
-        .testimonial-author {
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 0;
-            text-align: right;
-        }
-
-        .scroll-arrow {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-
-        .scroll-arrow:hover {
-            background-color: var(--accent-hover);
-            transform: scale(1.05);
-        }
-
-        .scroll-arrow:active {
-            transform: scale(0.95);
-        }
-
-        /* Mobile */
         @media (max-width: 768px) {
-            /* html {
-                scroll-snap-type: none;
-            } */
-            
-            section {
-                height: auto;
-                min-height: 100vh;
-                /* scroll-snap-align: none; */
-                padding: 3rem 0;
+            .float-image {
+                float: none;
+                display: block;
+                width: 100%;
+                max-width: none;
+                margin: 0 auto 1.5rem auto;
             }
-            
-            .nav-dots {
-                display: none;
-            }
-            
-            .scroll-indicator {
-                display: none;
-            }
-            
-            .scroll-arrow {
-                display: none;
-            }
-            
-            body {
-                font-size: 18px;
-            }
-
-            h1 {
-                font-size: 1.75rem;
-            }
-
-            h2 {
-                font-size: 1.5rem;
-            }
-
-            .service-grid {
+            .service-bullets {
                 grid-template-columns: 1fr;
             }
-
-            .testimonial-card {
-                flex: 0 0 85%;
-                padding: 1.5rem;
-                font-size: 1rem;
-            }
-            
-            .testimonials-scroll {
-                max-width: none;
-                gap: 1rem;
-            }
-            
-            .testimonials-wrapper {
-                margin: 0 -1.5rem;
-                padding: 0 1.5rem;
-            }
-
-            .cta-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            .audit-box {
-                padding: 1.5rem;
-            }
-            
-            .single-box {
-                padding: 1.5rem;
-            }
         }
 
-        @media print {
-            html {
-                scroll-snap-type: none;
-            }
-            
-            section {
-                height: auto;
-                scroll-snap-align: none;
-            }
-            
-            body {
-                font-size: 12pt;
-                color: #272761;
-            }
-
-            .audit-box {
-                background-color: #fef6ed !important;
-                border: 2px solid #E88A3C;
-                box-shadow: none;
-                page-break-inside: avoid;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            .btn,
-            .nav-dots,
-            .scroll-indicator,
-            .scroll-arrow {
-                display: none;
-            }
-        }
-    </style>
+   </style>
 
 </head>
 <body>
 
-    <section id="hero">
-        <div class="container">
-         <div class="logo-container">
-          <img src="lightlogo.jpg" alt="Cetevan" class="logo">
-          </div>
-            <h1>Save Weeks of Research—Get Your Bitcoin Security Right the First Time</h1>
-            <p class="tagline">
-                Whether you prefer simple apps or you're a command-line expert, I bridge the gap 
-                between where you are and a robust self-custody setup. All recommendations use 
-                open-source tools and public best practices—I'll get you there faster than going it alone.
-            </p>
-            <div class="cta-group">
-                <a href="#audit" class="btn">Take the 5-Minute Security Audit</a>
-                <a href="#contact" class="btn btn-secondary">Schedule Free Consultation</a>
-            </div>
-            <a href="#problem" class="scroll-indicator" aria-label="Scroll down">
-                <span>↓</span>
-            </a>
-        </div>
-    </section>
+   <nav class="sticky-nav">
+       <div class="nav-container">
+           <a href="#hero" class="nav-logo">Cetevan</a>
+           <div class="nav-links">
+               <a href="#problem">Problem</a>
+               <a href="#audit">Audit</a>
+               <a href="#how-it-works">Process</a>
+               <a href="#pricing">Pricing</a>
+               <a href="#about">About</a>
+               <a href="#testimonials">Testimonials</a>
+               <a href="#contact" class="nav-cta">Contact</a>
+           </div>
+       </div>
+   </nav>
 
-    <section id="problem">
-        <div class="container">
-            <h2>The Digital Mattress Problem</h2>
-            <p>
-                You moved your wealth out of the banking system for a reason. But if your Bitcoin is sitting 
-                on an exchange, or stored on a single hardware wallet in your desk drawer, you haven't eliminated 
-                risk—you've just changed its shape.
-            </p>
-            <p>
-                For those of us who remember safety deposit boxes and bond certificates, Bitcoin can feel like 
-                stuffing cash in a digital mattress. You know it's valuable. You know it needs protection. 
-                But the tools feel foreign, and the stakes are high.
-            </p>
-            <p>
-                That's where Cetevan comes in.
-            </p>
-        </div>
-    </section>
+   <section id="hero">
+       <div class="container">
+        <div class="logo-container">
+         <img src="lightlogo.jpg" alt="Cetevan" class="logo">
+         </div>
+           <h1>Save Weeks of Research—Get Your Bitcoin Security Right the First Time</h1>
+           <p class="tagline">
+               Whether you prefer simple apps or you're a command-line expert, I bridge the gap 
+               between where you are and a robust self-custody setup. All recommendations use 
+               open-source tools and public best practices—I'll get you there faster than going it alone.
+           </p>
+           <div class="cta-group">
+               <a href="#audit" class="btn">Take the 5-Minute Security Audit</a>
+               <a href="#contact" class="btn btn-secondary">Schedule a Free Consultation</a>
+           </div>
+           <a href="#problem" class="scroll-indicator" aria-label="Scroll down">
+               <span>↓</span>
+           </a>
+       </div>
+   </section>
 
-    <section id="audit">
-        <div class="container">
-            <div class="audit-box">
-                <h2>The 5-Minute Security Audit</h2>
-                <p>Check your current setup:</p>
-                
-                <ul class="audit-list">
-                    <li>If your house/devices were destroyed, could you recover your bitcoin?</li>
-                    <li>Could your loved one(s) access the funds without help after you're gone?</li>
-                    <li>Do you have backups in multiple locations?</li>
-                    <li>Is your recovery phrase removed from computers/phone/cloud?</li>
-                    <li>Have you done a recovery test this year?</li>
-                </ul>
-
-                <div class="audit-warning">
-                    A "NO" means you're at risk of losing your bitcoin.
-                </div>
-
-                <div class="text-center mt-2">
-                    <a href="#contact" class="btn">Fix These Gaps—Book Free Consultation</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="how-it-works">
-        <div class="container">
-            <h2>How It Works</h2>
-            <div class="single-box">
-                <p>All my recommendations are readily available in public documentation—but I'll get you from where you are to where you want to be faster, with fewer missteps.</p>
-                
-                <p><strong>Step 1: Free Audit (30 min)</strong><br>
-                Review your current setup. Get a prioritized roadmap. No obligation.</p>
-                
-                <p><strong>Step 2: Guided Implementation</strong><br>
-                Real-time guidance while you operate. You control the keys. I never touch your devices.</p>
-                
-                <p><strong>Step 3: Legacy Plan (Optional)</strong><br>
-                Multi-sig, heir education, and written recovery protocols for significant holdings.</p>
-                
-                <p style="margin-top: 1rem; font-size: 0.9rem; font-style: italic;">
-                    All work governed by a Master Service Agreement that prohibits me from accessing your funds.
-                </p>
-            </div>
-        </div>
-    </section>
-
-
-    <section id="services">
-        <div class="container">
-            <h2>Specific Ways I Can Help</h2>
-            <p>Not sure what you need? Start here:</p>
-            
-            <div class="service-grid">
-                <div class="service-item">
-                    <h3>🔐 First-Time Setup</h3>
-                    <p>Move from exchange to cold storage. Choose and configure your first hardware wallet, create backups, verify everything works.</p>
-                </div>
-                
-                <div class="service-item">
-                    <h3>🛡️ Security Audit</h3>
-                    <p>Already have a setup? I'll identify single points of failure and recommend specific improvements.</p>
-                </div>
-                
-                <div class="service-item">
-                    <h3>🏛️ Estate Planning</h3>
-                    <p>Ensure your spouse or children can inherit without knowing your seed phrase now. Multi-sig or dead man's switch setup.</p>
-                </div>
-            </div>
-            
-            <p style="margin-top: 2rem; text-align: center; font-size: 0.95rem;">
-                <strong>Don't see your situation?</strong> The free consultation figures out exactly what you need.
-            </p>
-        </div>
-    </section>
-
-
-    <section id="who-for">
-        <div class="container">
-            <h2>Who This Is For</h2>
-            <p>
-                You either want to start with Bitcoin or already have some and aren't sure about the next steps. 
-                Specifically:
-            </p>
-            <ul>
-                <li>You want your spouse or heirs to inherit without calling a "Bitcoin help desk" (which doesn't exist)</li>
-                <li>You value privacy and want to minimize data trails while maximizing security</li>
-                <li>You're willing to learn, but want an expert watching your first setup to avoid costly mistakes</li>
-                <li>You already have a setup and want a second opinion on your security architecture</li>
-            </ul>
-            <p>
-                <strong>Not sure if you're technical enough?</strong> If you can use online banking, you can do this—with guidance.
-            </p>
-        </div>
-    </section>
-
-    <section id="pricing">
-        <div class="container">
-            <h2>Pricing</h2>
-            
-           <p><strong>Guided Implementation:</strong> $200/hour (Bitcoin/Lightning) or $220/hour (Fiat)</p>
-            
-            <p>What's included:</p>
-            <ul>
-                <li>Pre-session threat modeling</li>
-                <li>Real-time guidance (in-person throughout Southern California, or remote if preferred)</li>
-                <li>Post-session documentation</li>
-                <li>Ongoing Signal support for clarifications</li>
-            </ul>
-
-            <p><strong>First consultation is always free.</strong></p>
-            
-            <p style="font-size: 0.95rem; color: var(--text-secondary);">
-                Ask about special group rates!
-            </p>
-        </div>
-    </section>
-
-    <section id="about">
-        <div class="container">
-            <h2>About Cetevan</h2>
-            <p>
-                Corey Edwards has been organizing the San Diego Bitcoiners community for five years. 
-                Cetevan is the formalization of that work—helping individuals and families 
-                implement bank-grade security without bank-grade complexity.
-            </p>
-            <p>
-                All recommendations use open-source software and follow established best practices 
-                from the Bitcoin developer community. No proprietary tools. 
-                No hidden fees.
-            </p>
-            <p>
-                Based in San Diego, CA. Available for in-person setup throughout Southern California 
-                or remote sessions nationwide.
-            </p>
-        </div>
-    </section>
-
-    <section id="testimonials">
-        <div class="container">
-            <h2>What Clients Say</h2>
-            
-            <div class="testimonials-wrapper">
-                <button class="scroll-arrow left" aria-label="Previous testimonial">←</button>
-                
-                <div class="testimonials-scroll">
-                    <div class="testimonial-card">
-                        <p class="testimonial-text">"Corey has been an outstanding Bitcoin mentor for me and many others. He's deeply knowledgeable, stays current with rapidly evolving Bitcoin technology, and consistently provides clear, practical guidance. Beyond his expertise, he's easy to work with, responsive, thoughtful, and genuinely invested in helping you understand and make smart decisions. That combination is rare, and it's why he's my go-to Bitcoin consultant."</p>
-                        <p class="testimonial-author">— Michael</p>
-                    </div>
-
-                    <div class="testimonial-card">
-                        <p class="testimonial-text">"I've had the pleasure of working with Corey in the Bitcoin space, and I'm blown away by his expertise and enthusiasm. He took the time to understand my needs, clearly explained tradeoffs, and provided reliable sources to back up his guidance. What's more, he's incredibly responsive and always willing to lend a hand when needed. Corey's passion for Bitcoin is infectious, and his dedication to helping others is unparalleled. If you're looking for a knowledgeable and supportive consultant, Corey is your guy!"</p>
-                        <p class="testimonial-author">— K</p>
-                    </div>
-
-                    <div class="testimonial-card">
-                        <p class="testimonial-text">"Stepping into Bitcoin ownership was terrifying to me in many ways, though I was committed. As my balance grew, so did the risk. I fully understood the responsibility of self-custody. When I met Corey, I was already 'pretty good'. I knew technology, ran my own node, had multi-signature wallets, etc. I was very pleased to gain great insights (and validation) that I was on the right track. Corey highlighted some things that I hadn't considered and expanded my scope of concern. This has greatly improved my comfort level. I continue to benefit from Corey's insights and his immense intellectual curiosity. If you haven't had a conversation with Corey yet - please do! It will likely be the beginning of a highly beneficial relationship."</p>
-                        <p class="testimonial-author">— Dan C</p>
-                    </div>
-
-                    <div class="testimonial-card">
-                        <p class="testimonial-text">"Corey - the Super Hero of Crypto! Seriously, that's what I thought when I met him - he not only understands and uses cryptocurrency himself, but is also helping other people get excited about it. Corey has been an amazing resource - he patiently answers my questions and has provided invaluable guidance in navigating this new digital frontier."</p>
-                        <p class="testimonial-author">— Tori</p>
-                    </div>
-                </div>
-                
-                <button class="scroll-arrow right" aria-label="Next testimonial">→</button>
-            </div>
-        </div>
-    </section>
-
-
-    <section id="contact">
-        <div class="container">
-            <h2>Ready to Close the Gaps?</h2>
-            
-            <form id="contact-form" onsubmit="return false;" style="width: 100%; margin: 2rem 0; text-align: left;">
-
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem;">
-                </div>
-                
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label for="contact-info">
-                        Email or <a href="https://signal.org" target="_blank" style="color: var(--accent); text-decoration: underline;">Signal</a> handle
-                    </label>
-                    <input type="text" id="contact-info" name="contact-info" placeholder="user@email.com or @username.01" required 
-                        pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$|^@[a-zA-Z0-9_]+\.\d{2}$"
-                        title="Enter a valid email address or Signal handle (e.g., @username.01)"
-                        style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem;">
-                    <small style="color: var(--text-secondary); font-size: 0.85rem;">Signal format: @username.01</small>
-                </div>
-                
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label for="message">Comments</label>
-                    <textarea id="message" name="message" rows="4" placeholder="Be as detailed as you wish, or save it for our chat." required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
-                </div>
-                
-                <button type="submit" class="btn" style="width: 100%; margin-top: 1.5rem;">Send Message</button>
-            </form>
-            
-            <div id="form-status" style="text-align: center; margin-top: 1rem; display: none;"></div>
-
-            <p style="margin-top: 2rem; text-align: center;">
-                Or find me at <a href="https://lu.ma/sdbitcoiners"><strong>San Diego Bitcoiners</strong></a> events.
-            </p>
-        </div>
-
-        <footer style="margin-top: auto; border-top: 1px solid var(--border); padding: 2rem 0; width: 100%; background-color: var(--bg-secondary);">
-            <div class="container">
-                <p><strong>Cetevan, LLC</strong> | San Diego, CA</p>
-                <p style="font-size: 0.85rem; max-width: 600px; margin: 1rem auto;">
-                    Disclaimer: Services are educational and technical only. Cetevan does not hold custody of 
-                    client funds, provide investment advice, or guarantee specific security outcomes. 
-                    Client maintains sole control and responsibility for all private keys.
-                </p>
-                <p style="font-size: 0.85rem; margin-top: 1rem;">© 2026 Cetevan, LLC</p>
-            </div>
-        </footer>
-
-        <script src="https://unpkg.com/nostr-tools@1.17.0/lib/nostr.bundle.js"></script>
-        <script>
-            const RECIPIENT_NPUB = 'npub1c0r3ytrr4afgrlhrhyec6y9wvkckdllx7ul3cfevtsgjqcrhx8tsdzqs7w';
-            const RECIPIENT_HEX = window.NostrTools.nip19.decode(RECIPIENT_NPUB).data;
-            
-            const RELAYS = [
-                'wss://bits.sdbitcoiners.com/nostrrelay/Leug2TNY',
-                'wss://relay.damus.io',
-                'wss://nos.lol',
-                'wss://relay.nostr.band'
-            ];
-
-            document.getElementById('contact-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const status = document.getElementById('form-status');
-                status.style.display = 'block';
-                status.innerHTML = '<p>Encrypting and sending...</p>';
-                
-                try {
-                    const sk = window.NostrTools.generatePrivateKey();
-                    const pk = window.NostrTools.getPublicKey(sk);
-                    
-                    const formData = {
-                        name: document.getElementById('name').value,
-                        contact: document.getElementById('contact-info').value,
-                        message: document.getElementById('message').value,
-                        timestamp: new Date().toISOString(),
-                        source: 'cetevan.com'
-                    };
-                    
-                    const encryptedContent = await window.NostrTools.nip04.encrypt(
-                        sk, 
-                        RECIPIENT_HEX, 
-                        JSON.stringify(formData)
-                    );
-                    
-                    const event = {
-                        kind: 4,
-                        pubkey: pk,
-                        created_at: Math.floor(Date.now() / 1000),
-                        tags: [['p', RECIPIENT_HEX]],
-                        content: encryptedContent
-                    };
-                    
-                    event.id = window.NostrTools.getEventHash(event);
-                    event.sig = window.NostrTools.signEvent(event, sk);
-                    
-                    let publishedCount = 0;
-                    const publishPromises = RELAYS.map(relayUrl => {
-                        return new Promise((resolve) => {
-                            const ws = new WebSocket(relayUrl);
-                            let timeout;
-                            
-                            ws.onopen = () => {
-                                ws.send(JSON.stringify(['EVENT', event]));
-                                timeout = setTimeout(() => {
-                                    ws.close();
-                                    resolve(false);
-                                }, 5000);
-                            };
-                            
-                            ws.onmessage = (msg) => {
-                                const data = JSON.parse(msg.data);
-                                if (data[0] === 'OK' && data[1] === event.id) {
-                                    clearTimeout(timeout);
-                                    ws.close();
-                                    resolve(true);
-                                }
-                            };
-                            
-                            ws.onerror = () => {
-                                clearTimeout(timeout);
-                                ws.close();
-                                resolve(false);
-                            };
-                        });
-                    });
-                    
-                    const results = await Promise.all(publishPromises);
-                    publishedCount = results.filter(r => r).length;
-                    
-                    if (publishedCount > 0) {
-                        status.innerHTML = `<p style="color: var(--accent);"><strong>Message sent!</strong></p>
-                            <p>Published to ${publishedCount} relay(s). I'll respond via Signal or email within 24 hours.</p>`;
-                        document.getElementById('contact-form').reset();
-                    } else {
-                        throw new Error('No relays accepted the message');
-                    }
-                    
-                } catch (error) {
-                    console.error(error);
-                    status.innerHTML = `<p style="color: #dc2626;"><strong>Network error.</strong></p>
-                        <p>Please reach out directly on Signal or email.</p>`;
-                }
-            });
-
-            // Testimonial scroll arrows
-            const scrollContainer = document.querySelector('.testimonials-scroll');
-            const leftArrow = document.querySelector('.scroll-arrow.left');
-            const rightArrow = document.querySelector('.scroll-arrow.right');
-            
-            if (scrollContainer && leftArrow && rightArrow) {
-                const scrollAmount = scrollContainer.offsetWidth + 32; // Card width + gap
-                
-                leftArrow.addEventListener('click', () => {
-                    scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-                });
-                
-                rightArrow.addEventListener('click', () => {
-                    scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                });
-            }
-
-        </script>
-    </section>
-
-    <div class="nav-dots">
-        <a href="#hero" class="nav-dot" title="Home"></a>
-        <a href="#problem" class="nav-dot" title="Problem"></a>
-        <a href="#audit" class="nav-dot" title="Audit"></a>
-        <a href="#how-it-works" class="nav-dot" title="How It Works"></a>
-        <a href="#services" class="nav-dot" title="Services"></a>
-        <a href="#who-for" class="nav-dot" title="Who It's For"></a>
-        <a href="#pricing" class="nav-dot" title="Pricing"></a>
-        <a href="#about" class="nav-dot" title="About"></a>
-        <a href="#testimonials" class="nav-dot" title="Testimonials"></a>
-        <a href="#contact" class="nav-dot" title="Contact"></a>
+   <section id="problem">
+    <div class="container">
+        <h2>The Digital Mattress Problem</h2>
+        <img src="digitalmattress.png" alt="Digital Mattress" class="float-image">
+        <p>
+            You moved your wealth out of the banking system for a reason. But if your Bitcoin is sitting 
+            on an exchange, or stored on a single hardware wallet in your desk drawer, you haven't eliminated 
+            risk—you've just changed its shape.
+        </p>
+        <p>
+            For those of us who remember safety deposit boxes and bond certificates, Bitcoin can feel like 
+            stuffing cash in a digital mattress. You know it's valuable. You know it needs protection. 
+            But the tools feel foreign, and the stakes are high.
+        </p>
+        <p>
+            That's where Cetevan comes in. I can help you with:
+        </p>
+        <ul class="service-bullets">
+            <li>First-Time Setup</li>
+            <li>Security Audit</li>
+            <li>Estate Planning</li>
+            <li>Multi-sig Configuration</li>
+            <li>Recovery Testing</li>
+            <li>Heir Education</li>
+        </ul>
     </div>
+</section>
+
+   <section id="audit">
+       <div class="container">
+           <div class="audit-box">
+               <h2>The 5-Minute Security Audit</h2>
+               <p class="audit-intro">Ask yourself these questions:</p>
+               
+               <ul class="audit-list">
+                   <li>If your house/devices were destroyed, could you recover your bitcoin?</li>
+                   <li>Could your loved one(s) access the funds without help after you're gone?</li>
+                   <li>Do you have backups in multiple locations?</li>
+                   <li>Is your recovery phrase removed from computers/phone/cloud?</li>
+                   <li>Have you done a recovery test this year?</li>
+               </ul>
+
+               <div class="audit-warning">
+                   A "NO" means you're at risk of losing your bitcoin.
+               </div>
+
+               <div class="text-center mt-2">
+                   <a href="#contact" class="btn">Fix These Gaps—Book a Free Consultation</a>
+               </div>
+           </div>
+       </div>
+   </section>
+
+   <section id="how-it-works">
+       <div class="container">
+           <h2>How It Works</h2>
+           <p style="text-align: center; margin-bottom: 2rem;">All my recommendations are readily available in public documentation—but I'll get you from where you are to where you want to be faster, with fewer missteps.</p>
+           
+           <div class="steps-grid">
+               <div class="step-box">
+                   <h3>Step 1: Free Consultation</h3>
+                   <p>30-minute review of your current setup. Get a prioritized roadmap. No obligation.</p>
+               </div>
+               
+               <div class="step-box">
+                   <h3>Step 2: Guided Implementation</h3>
+                   <p>Real-time guidance while you operate. You control the keys. I never touch your devices.</p>
+               </div>
+               
+               <div class="step-box">
+                   <h3>Step 3: Legacy Plan (Optional)</h3>
+                   <p>Multi-sig, heir education, and written recovery protocols for significant holdings.</p>
+               </div>
+           </div>
+           
+           <p style="margin-top: 2rem; text-align: center; font-size: 0.9rem; font-style: italic;">
+               All work governed by a Master Service Agreement that prohibits me from accessing your funds.
+           </p>
+
+       </div>
+   </section>
+
+   <section id="pricing">
+       <div class="container">
+           <h2>Pricing</h2>
+           
+          <p><strong>Guided Implementation:</strong> $200/hour (Bitcoin/Lightning) or $220/hour (Fiat). Ask about special group rates!</p>
+           
+           <p>What's included:</p>
+           <ul>
+               <li>Free initial self-custody audit</li>
+               <li>Real-time guidance (in-person or remote)</li>
+               <li>Post-session documentation</li>
+               <li>Ongoing Signal support for clarifications</li>
+           </ul>
+
+           <p><strong>First 30-minute consultation is always free.</strong></p>
+       </div>
+   </section>
+
+   <section id="about">
+       <div class="container">
+           <h2>About Cetevan</h2>
+           <div class="about-content">
+               <div class="about-text">
+                   <p>
+                       Corey Edwards has been organizing the <a href="https://lu.ma/sdbitcoiners" target="_blank">San Diego Bitcoiners</a> community for five years. 
+                       Cetevan is the formalization of that work—helping individuals and families 
+                       implement bank-grade security without bank-grade complexity.
+                   </p>
+                   <p>
+                       All recommendations use open-source software and follow established best practices 
+                       from the Bitcoin developer community. No proprietary tools. 
+                       No hidden fees.
+                   </p>
+                   <p>
+                       Based in San Diego, CA. Available for in-person setup throughout Southern California 
+                       or remote sessions nationwide.
+                   </p>
+               </div>
+               <div class="about-portrait">
+                   <div class="portrait-placeholder">
+                       [Portrait:<br>Corey Edwards]
+                   </div>
+               </div>
+           </div>
+       </div>
+   </section>
+
+   <section id="testimonials">
+       <div class="container">
+           <h2>What Clients Say</h2>
+           
+           <div class="testimonials-wrapper">
+               <button class="scroll-arrow left" aria-label="Previous testimonial">←</button>
+               
+               <div class="testimonials-scroll">
+                   <div class="testimonial-card">
+                       <p class="testimonial-text">"Corey has been an outstanding Bitcoin mentor for me and many others. He's deeply knowledgeable, stays current with rapidly evolving Bitcoin technology, and consistently provides clear, practical guidance. Beyond his expertise, he's easy to work with, responsive, thoughtful, and genuinely invested in helping you understand and make smart decisions. That combination is rare, and it's why he's my go-to Bitcoin consultant."</p>
+                       <p class="testimonial-author">— Michael</p>
+                   </div>
+
+                   <div class="testimonial-card">
+                       <p class="testimonial-text">"I've had the pleasure of working with Corey in the Bitcoin space, and I'm blown away by his expertise and enthusiasm. He took the time to understand my needs, clearly explained tradeoffs, and provided reliable sources to back up his guidance. What's more, he's incredibly responsive and always willing to lend a hand when needed. Corey's passion for Bitcoin is infectious, and his dedication to helping others is unparalleled. If you're looking for a knowledgeable and supportive consultant, Corey is your guy!"</p>
+                       <p class="testimonial-author">— K</p>
+                   </div>
+
+                   <div class="testimonial-card">
+                       <p class="testimonial-text">"Stepping into Bitcoin ownership was terrifying to me in many ways, though I was committed. As my balance grew, so did the risk. I fully understood the responsibility of self-custody. When I met Corey, I was already 'pretty good'. I knew technology, ran my own node, had multi-signature wallets, etc. I was very pleased to gain great insights (and validation) that I was on the right track. Corey highlighted some things that I hadn't considered and expanded my scope of concern. This has greatly improved my comfort level. I continue to benefit from Corey's insights and his immense intellectual curiosity. If you haven't had a conversation with Corey yet - please do! It will likely be the beginning of a highly beneficial relationship."</p>
+                       <p class="testimonial-author">— Dan C</p>
+                   </div>
+
+                   <div class="testimonial-card">
+                       <p class="testimonial-text">"Corey - the Super Hero of Crypto! Seriously, that's what I thought when I met him - he not only understands and uses cryptocurrency himself, but is also helping other people get excited about it. Corey has been an amazing resource - he patiently answers my questions and has provided invaluable guidance in navigating this new digital frontier."</p>
+                       <p class="testimonial-author">— Tori</p>
+                   </div>
+               </div>
+               
+               <button class="scroll-arrow right" aria-label="Next testimonial">→</button>
+           </div>
+       </div>
+   </section>
+
+   <section id="contact">
+       <div class="container">
+           <h2>Ready to Close the Gaps?</h2>
+           
+           <form id="contact-form" onsubmit="return false;" style="width: 100%; margin: 2rem 0; text-align: left;">
+
+               <div class="form-group">
+                   <label for="name">Name</label>
+                   <input type="text" id="name" name="name" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem;">
+               </div>
+               
+               <div class="form-group" style="margin-top: 1rem;">
+                   <label for="contact-info">
+                       Email or <a href="https://signal.org" target="_blank" style="color: var(--accent); text-decoration: underline;">Signal</a> handle
+                   </label>
+                   <input type="text" id="contact-info" name="contact-info" placeholder="user@email.com or @username.01" required 
+                       pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$|^@[a-zA-Z0-9_]+\.\d{2}$"
+                       title="Enter a valid email address or Signal handle (e.g., @username.01)"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem;">
+                   <small style="color: var(--text-secondary); font-size: 0.85rem;">Signal format: @username.01</small>
+               </div>
+               
+               <div class="form-group" style="margin-top: 1rem;">
+                   <label for="message">Comments</label>
+                   <textarea id="message" name="message" rows="4" placeholder="Be as detailed as you wish, or save it for our chat." required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+               </div>
+               
+               <button type="submit" class="btn" style="width: 100%; margin-top: 1.5rem;">Send Message</button>
+           </form>
+           
+           <div id="form-status" style="text-align: center; margin-top: 1rem; display: none;"></div>
+
+           <p style="margin-top: 2rem; text-align: center;">
+               Or find me at <a href="https://lu.ma/sdbitcoiners"><strong>San Diego Bitcoiners</strong></a> events.
+           </p>
+       </div>
+
+       <footer style="margin-top: auto; border-top: 1px solid var(--border); padding: 2rem 0; width: 100%; background-color: var(--bg-secondary);">
+           <div class="container">
+               <p><strong>Cetevan, LLC</strong> | San Diego, CA</p>
+               <p style="font-size: 0.85rem; max-width: 600px; margin: 1rem auto;">
+                   Disclaimer: Services are educational and technical only. Cetevan does not hold custody of 
+                   client funds, provide investment advice, or guarantee specific security outcomes. 
+                   Client maintains sole control and responsibility for all private keys.
+               </p>
+               <p style="font-size: 0.85rem; margin-top: 1rem;">© 2026 Cetevan, LLC</p>
+           </div>
+       </footer>
+
+       <script src="https://unpkg.com/nostr-tools@1.17.0/lib/nostr.bundle.js"></script>
+       <script>
+           const RECIPIENT_NPUB = 'npub1c0r3ytrr4afgrlhrhyec6y9wvkckdllx7ul3cfevtsgjqcrhx8tsdzqs7w';
+           const RECIPIENT_HEX = window.NostrTools.nip19.decode(RECIPIENT_NPUB).data;
+           
+           const RELAYS = [
+               'wss://bits.sdbitcoiners.com/nostrrelay/Leug2TNY',
+               'wss://relay.damus.io',
+               'wss://nos.lol',
+               'wss://relay.nostr.band'
+           ];
+
+           document.getElementById('contact-form').addEventListener('submit', async (e) => {
+               e.preventDefault();
+               const status = document.getElementById('form-status');
+               status.style.display = 'block';
+               status.innerHTML = '<p>Encrypting and sending...</p>';
+               
+               try {
+                   const sk = window.NostrTools.generatePrivateKey();
+                   const pk = window.NostrTools.getPublicKey(sk);
+                   
+                   const formData = {
+                       name: document.getElementById('name').value,
+                       contact: document.getElementById('contact-info').value,
+                       message: document.getElementById('message').value,
+                       timestamp: new Date().toISOString(),
+                       source: 'cetevan.com'
+                   };
+                   
+                   const encryptedContent = await window.NostrTools.nip04.encrypt(
+                       sk, 
+                       RECIPIENT_HEX, 
+                       JSON.stringify(formData)
+                   );
+                   
+                   const event = {
+                       kind: 4,
+                       pubkey: pk,
+                       created_at: Math.floor(Date.now() / 1000),
+                       tags: [['p', RECIPIENT_HEX]],
+                       content: encryptedContent
+                   };
+                   
+                   event.id = window.NostrTools.getEventHash(event);
+                   event.sig = window.NostrTools.signEvent(event, sk);
+                   
+                   let publishedCount = 0;
+                   const publishPromises = RELAYS.map(relayUrl => {
+                       return new Promise((resolve) => {
+                           const ws = new WebSocket(relayUrl);
+                           let timeout;
+                           
+                           ws.onopen = () => {
+                               ws.send(JSON.stringify(['EVENT', event]));
+                               timeout = setTimeout(() => {
+                                   ws.close();
+                                   resolve(false);
+                               }, 5000);
+                           };
+                           
+                           ws.onmessage = (msg) => {
+                               const data = JSON.parse(msg.data);
+                               if (data[0] === 'OK' && data[1] === event.id) {
+                                   clearTimeout(timeout);
+                                   ws.close();
+                                   resolve(true);
+                               }
+                           };
+                           
+                           ws.onerror = () => {
+                               clearTimeout(timeout);
+                               ws.close();
+                               resolve(false);
+                           };
+                       });
+                   });
+                   
+                   const results = await Promise.all(publishPromises);
+                   publishedCount = results.filter(r => r).length;
+                   
+                   if (publishedCount > 0) {
+                       status.innerHTML = `<p style="color: var(--accent);"><strong>Message sent!</strong></p>
+                           <p>Published to ${publishedCount} relay(s). I'll respond via Signal or email within 24 hours.</p>`;
+                       document.getElementById('contact-form').reset();
+                   } else {
+                       throw new Error('No relays accepted the message');
+                   }
+                   
+               } catch (error) {
+                   console.error(error);
+                   status.innerHTML = `<p style="color: #dc2626;"><strong>Network error.</strong></p>
+                       <p>Please reach out directly on Signal or email.</p>`;
+               }
+           });
+
+           // Testimonial scroll arrows
+           const scrollContainer = document.querySelector('.testimonials-scroll');
+           const leftArrow = document.querySelector('.scroll-arrow.left');
+           const rightArrow = document.querySelector('.scroll-arrow.right');
+           
+           if (scrollContainer && leftArrow && rightArrow) {
+               const scrollAmount = scrollContainer.offsetWidth + 32;
+               
+               leftArrow.addEventListener('click', () => {
+                   scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+               });
+               
+               rightArrow.addEventListener('click', () => {
+                   scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+               });
+           }
+
+       </script>
+   </section>
 
 </body>
 </html>
